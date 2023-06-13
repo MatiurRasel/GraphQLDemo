@@ -16,12 +16,10 @@ namespace GraphQLDemo.API.Schema.Course
 
         public string Description()
         {
-
             return $"{Name} is a course of {Subject}.Instructor Of this Course " +
                 $"is {Instructor.FirstName} {Instructor.LastName}. Top Student Of This " +
                 $"Course {Students.OrderByDescending(x => x.GPA).FirstOrDefault()?.FirstName} " +
-                $"{Students.OrderByDescending(x => x.GPA).FirstOrDefault()?.LastName}";
-
+                $"{Students.OrderByDescending(x => x.GPA).FirstOrDefault()?.LastName}.";
         }
     }
 }
