@@ -1,7 +1,10 @@
-using GraphQLDemo.API.Schema;
+using GraphQLDemo.API.Schema.Course;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddGraphQLServer().AddQueryType<Query>(); ;
+builder.Services.AddGraphQLServer()
+    .AddQueryType<CourseQuery>()
+    .AddMutationType<CourseMutation>();
+
 var app = builder.Build();
 
 //app.MapGet("/", () => "Hello World!");
