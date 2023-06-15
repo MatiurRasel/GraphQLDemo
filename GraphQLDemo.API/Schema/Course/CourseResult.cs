@@ -1,4 +1,4 @@
-﻿using GraphQLDemo.API.Schema.In_General.Enum;
+﻿using GraphQLDemo.API.Models.Enum;
 
 namespace GraphQLDemo.API.Schema.Course
 {

@@ -1,4 +1,4 @@
-﻿namespace GraphQLDemo.API.Schema.In_General.Enum
+﻿namespace GraphQLDemo.API.Models.Enum
 {
     public enum Subject
     {
