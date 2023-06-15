@@ -1,4 +1,6 @@
-﻿namespace GraphQLDemo.API.Schema.Instructor
+﻿using GraphQLDemo.API.Models.Type;
+
+namespace GraphQLDemo.API.Schema.Instructor
 {
     public class InstructorType : PersonType
     {
