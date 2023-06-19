@@ -1,7 +1,9 @@
+using GraphQLDemo.API.DataLoaders;
 using GraphQLDemo.API.Schema.Course;
 using GraphQLDemo.API.Schema.Subscriptions;
 using GraphQLDemo.API.Services;
 using GraphQLDemo.API.Services.Courses;
+using GraphQLDemo.API.Services.Instructors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -11,13 +13,16 @@ builder.Services.AddGraphQLServer()
     .AddQueryType<CourseQuery>()
     .AddMutationType<CourseMutation>()
     .AddSubscriptionType<Subscription>()
-    .AddInMemorySubscriptions();
+    .AddInMemorySubscriptions()
+    .AddFiltering().AddSorting().AddProjections();
 
 var connectionString = builder.Configuration.GetConnectionString("default");
 builder.Services.AddPooledDbContextFactory<SchoolDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseSqlite(connectionString).LogTo(Console.WriteLine));
 
-builder.Services.AddScoped<CoursesRepository> ();
+builder.Services.AddScoped<CoursesRepository>();
+builder.Services.AddScoped<InstructorsRepository>();
+builder.Services.AddScoped<InstructorDataLoader>();
 
 var app = builder.Build();
 app.UseRouting();

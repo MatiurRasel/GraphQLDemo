@@ -2,8 +2,9 @@
 {
     public enum Subject
     {
+        History,
         Mathematics,
-        Science,
-        History
+        Science
+        
     }
 }
