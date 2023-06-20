@@ -1,3 +1,6 @@
+using FirebaseAdmin;
+using FirebaseAdminAuthentication.DependencyInjection.Extensions;
+using FirebaseAdminAuthentication.DependencyInjection.Models;
 using GraphQLDemo.API.DataLoaders;
 using GraphQLDemo.API.Schema.Course;
 using GraphQLDemo.API.Schema.Subscriptions;
@@ -14,7 +17,14 @@ builder.Services.AddGraphQLServer()
     .AddMutationType<CourseMutation>()
     .AddSubscriptionType<Subscription>()
     .AddInMemorySubscriptions()
-    .AddFiltering().AddSorting().AddProjections();
+    .AddFiltering().AddSorting().AddProjections()
+    .AddAuthorization();
+
+builder.Services.AddSingleton(FirebaseApp.Create());
+builder.Services.AddFirebaseAuthentication();
+builder.Services.AddAuthorization(o =>
+                    o.AddPolicy("IsAdmin",
+                        p => p.RequireClaim(FirebaseUserClaimType.EMAIL, "matiurrasel1002@gmail.com")));
 
 var connectionString = builder.Configuration.GetConnectionString("default");
 builder.Services.AddPooledDbContextFactory<SchoolDbContext>(options =>
@@ -26,6 +36,7 @@ builder.Services.AddScoped<InstructorDataLoader>();
 
 var app = builder.Build();
 app.UseRouting();
+app.UseAuthentication();
 app.UseWebSockets();
 //app.MapGet("/", () => "Hello World!");
 app.MapGraphQL();
