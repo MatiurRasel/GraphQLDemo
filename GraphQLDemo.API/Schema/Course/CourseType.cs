@@ -1,14 +1,16 @@
-﻿using GraphQLDemo.API.DataLoaders;
+﻿using FirebaseAdmin.Auth;
+using GraphQLDemo.API.DataLoaders;
 using GraphQLDemo.API.DTOs;
 using GraphQLDemo.API.Models.Enum;
 using GraphQLDemo.API.Schema.Instructor;
 using GraphQLDemo.API.Schema.Student;
+using GraphQLDemo.API.Schema.User;
 using GraphQLDemo.API.Services.Instructors;
 
 namespace GraphQLDemo.API.Schema.Course
 {
 
-    public class CourseType
+    public class CourseType:ISearchResultType
     {
         public Guid Id { get; set; }
         //[IsProjected(false)]
@@ -31,6 +33,19 @@ namespace GraphQLDemo.API.Schema.Course
             };
         }
         public IEnumerable<StudentType> Students { get; set; }
+        [IsProjected(true)]
+        public string CreatorId { get; set; }
+
+        public async Task<UserType> Creator([Service] UserDataLoader userDataLoader)
+        {
+            if (CreatorId == null || CreatorId == "")
+            {
+                return null;
+            }
+
+            UserRecord user =  await FirebaseAuth.DefaultInstance.GetUserAsync(CreatorId);
+            return await userDataLoader.LoadAsync(CreatorId,CancellationToken.None);
+        }
 
         //public string Description()
         //{

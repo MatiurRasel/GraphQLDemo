@@ -1,24 +1,37 @@
+using AppAny.HotChocolate.FluentValidation;
 using FirebaseAdmin;
 using FirebaseAdminAuthentication.DependencyInjection.Extensions;
 using FirebaseAdminAuthentication.DependencyInjection.Models;
+using FluentValidation.AspNetCore;
 using GraphQLDemo.API.DataLoaders;
 using GraphQLDemo.API.Schema.Course;
+using GraphQLDemo.API.Schema.Instructor;
 using GraphQLDemo.API.Schema.Subscriptions;
 using GraphQLDemo.API.Services;
 using GraphQLDemo.API.Services.Courses;
 using GraphQLDemo.API.Services.Instructors;
+using GraphQLDemo.API.Validators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddFluentValidation();
+builder.Services.AddTransient<CourseTypeInputValidator>();
+
 builder.Services.AddGraphQLServer()
     .AddQueryType<CourseQuery>()
     .AddMutationType<CourseMutation>()
     .AddSubscriptionType<Subscription>()
+    .AddType<CourseType>().AddType<InstructorType>()
+    .AddTypeExtension<CourseQuery>()
     .AddInMemorySubscriptions()
     .AddFiltering().AddSorting().AddProjections()
-    .AddAuthorization();
+    .AddAuthorization()
+    .AddFluentValidation( o=>
+    {
+        o.UseDefaultErrorMapper();
+    });
 
 builder.Services.AddSingleton(FirebaseApp.Create());
 builder.Services.AddFirebaseAuthentication();
@@ -33,6 +46,7 @@ builder.Services.AddPooledDbContextFactory<SchoolDbContext>(options =>
 builder.Services.AddScoped<CoursesRepository>();
 builder.Services.AddScoped<InstructorsRepository>();
 builder.Services.AddScoped<InstructorDataLoader>();
+builder.Services.AddScoped<UserDataLoader>();
 
 var app = builder.Build();
 app.UseRouting();
