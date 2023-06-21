@@ -2,15 +2,18 @@
 using GraphQLDemo.API.DTOs;
 using GraphQLDemo.API.Models.Enum;
 using GraphQLDemo.API.Schema.Filters;
+using GraphQLDemo.API.Schema.General;
 using GraphQLDemo.API.Schema.Instructor;
 using GraphQLDemo.API.Schema.Sorters;
 using GraphQLDemo.API.Schema.Student;
 using GraphQLDemo.API.Services;
 using GraphQLDemo.API.Services.Courses;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
 namespace GraphQLDemo.API.Schema.Course
 {
+    [ExtendObjectType(typeof(Query))]
     public class CourseQuery
     {
         //private readonly Faker<InstructorType> _instructorFaker;
@@ -49,33 +52,12 @@ namespace GraphQLDemo.API.Schema.Course
             _coursesRepository = coursesRepository;
         }
 
-        public async Task<IEnumerable<CourseType>> GetCourses()
-        {
-            IEnumerable <CourseDTO> courseDTOs =  await _coursesRepository.GetAll();
-
-            return courseDTOs.Select(c => new CourseType
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Subject = c.Subject,
-                InstructorId = c.InstructorId,
-
-                //Instructor = new InstructorType()
-                //{
-                //    Id = c.Instructor.Id,
-                //    FirstName = c.Instructor.FirstName,
-                //    LastName = c.Instructor.LastName,
-                //    Salary = c.Instructor.Salary
-                //}
-            });
-            //return await _coursesRepository.Generate(5);
-        }
         [UseDbContext(typeof(SchoolDbContext))]
         [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
         [UseProjection]
         [UseFiltering(typeof(CourseFilterType))]
         [UseSorting(typeof(CourseSortType))]
-        public IQueryable<CourseType> GetPaginatedCourses([ScopedService] SchoolDbContext context)
+        public IQueryable<CourseType> GetCourses([ScopedService] SchoolDbContext context)
         {
             
             return context.Courses.Select(c => new CourseType()
@@ -84,7 +66,7 @@ namespace GraphQLDemo.API.Schema.Course
                 Name = c.Name,
                 Subject = c.Subject,
                 InstructorId = c.InstructorId,
-
+                CreatorId =  c.CreatorId,
                 //Instructor = new InstructorType()
                 //{
                 //    Id = c.Instructor.Id,
@@ -129,7 +111,7 @@ namespace GraphQLDemo.API.Schema.Course
                 Name = courseDTO.Name,
                 Subject = courseDTO.Subject,
                 InstructorId = courseDTO.InstructorId,
-
+                CreatorId = courseDTO.CreatorId,
                 //Instructor = new InstructorType()
                 //{
                 //    Id = courseDTO.Instructor.Id,
@@ -140,9 +122,5 @@ namespace GraphQLDemo.API.Schema.Course
             };
         }
 
-
-
-        [GraphQLDeprecated("This Query is deprecated.")]
-        public string Instructions => "Test Text For GraphQL";
     }
 }

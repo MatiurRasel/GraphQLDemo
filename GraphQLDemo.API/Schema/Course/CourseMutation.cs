@@ -1,7 +1,9 @@
-﻿using FirebaseAdminAuthentication.DependencyInjection.Models;
+﻿using AppAny.HotChocolate.FluentValidation;
+using FirebaseAdminAuthentication.DependencyInjection.Models;
 using GraphQLDemo.API.DTOs;
 using GraphQLDemo.API.Schema.Subscriptions;
 using GraphQLDemo.API.Services.Courses;
+using GraphQLDemo.API.Validators;
 using HotChocolate.Authorization;
 using HotChocolate.Subscriptions;
 using System.Security.Claims;
@@ -11,16 +13,24 @@ namespace GraphQLDemo.API.Schema.Course
     public class CourseMutation
     {
         private readonly CoursesRepository _coursesRepository;
-        public CourseMutation(CoursesRepository coursesRepository)
+        private readonly CourseTypeInputValidator _courseTypeInputValidator;
+
+        public CourseMutation(CoursesRepository coursesRepository
+            ,CourseTypeInputValidator courseTypeInputValidator)
         {
             _coursesRepository = coursesRepository;
+            _courseTypeInputValidator = courseTypeInputValidator;
         }
 
         [Authorize]
-        public async Task<CourseResult> CreateCourse(CourseInputType courseInput, 
+        public async Task<CourseResult> CreateCourse(
+            //[UseFluentValidation, UseValidator(typeof(CourseTypeInputValidator))]
+        CourseInputType courseInput, 
             [Service] ITopicEventSender topicEventSender,
             ClaimsPrincipal claimsPrincipal)
         {
+            Validate(courseInput);
+
             string userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
             string email = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL);
             string userName = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.USERNAME);
@@ -42,19 +52,33 @@ namespace GraphQLDemo.API.Schema.Course
                 Id = courseDTO.Id,
                 Name = courseDTO.Name,
                 Subject = courseDTO.Subject,
-                InstructorId= courseDTO.InstructorId
+                InstructorId = courseDTO.InstructorId
             };
-            
+
             await topicEventSender.SendAsync(nameof(Subscription.CourseCreated), courseType);
-            
+
             return courseType;
         }
+
+        private void Validate(CourseInputType courseInput)
+        {
+            var validationResult = _courseTypeInputValidator.Validate(courseInput);
+
+            if (!validationResult.IsValid)
+            {
+                throw new GraphQLException("Invalid input.");
+            }
+        }
+
         [Authorize]
-        public async Task<CourseResult> UpdateCourse(Guid id, 
-            CourseInputType courseInput, 
+        public async Task<CourseResult> UpdateCourse(Guid id,
+            //[UseFluentValidation, UseValidator(typeof(CourseTypeInputValidator))] 
+        CourseInputType courseInput, 
             [Service] ITopicEventSender topicEventSender,
             ClaimsPrincipal claimsPrincipal)
         {
+            Validate(courseInput);
+
             string userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
 
             CourseDTO CourseDTO = await _coursesRepository.GetById(id);
