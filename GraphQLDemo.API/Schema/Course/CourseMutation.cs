@@ -29,12 +29,13 @@ namespace GraphQLDemo.API.Schema.Course
         [UseUser]
         public async Task<CourseResult> CreateCourse(
         CourseInputType courseInput, 
-            [Service] ITopicEventSender topicEventSender,
-            [GlobalState("User")] User user)
+            [Service] ITopicEventSender topicEventSender//,
+            //[GlobalState("User")] User user
+            )
         {
             Validate(courseInput);
 
-            string userId = user.Id;
+            //string userId = user.Id;
             
 
 
@@ -43,7 +44,7 @@ namespace GraphQLDemo.API.Schema.Course
                 Name = courseInput.Name ?? "--",
                 Subject = courseInput.Subject,
                 InstructorId = courseInput.InstructorId,
-                CreatorId = userId
+                //CreatorId = userId
 
             };
             courseDTO = await _coursesRepository.Create(courseDTO);
