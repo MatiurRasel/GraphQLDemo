@@ -1,12 +1,15 @@
 ﻿using AppAny.HotChocolate.FluentValidation;
 using FirebaseAdminAuthentication.DependencyInjection.Models;
 using GraphQLDemo.API.DTOs;
+using GraphQLDemo.API.Middlewares.UseUser;
 using GraphQLDemo.API.Schema.Subscriptions;
 using GraphQLDemo.API.Services.Courses;
 using GraphQLDemo.API.Validators;
 using HotChocolate.Authorization;
 using HotChocolate.Subscriptions;
 using System.Security.Claims;
+using User = GraphQLDemo.API.Models.User;
+
 
 namespace GraphQLDemo.API.Schema.Course
 {
@@ -23,18 +26,16 @@ namespace GraphQLDemo.API.Schema.Course
         }
 
         [Authorize]
+        [UseUser]
         public async Task<CourseResult> CreateCourse(
-            //[UseFluentValidation, UseValidator(typeof(CourseTypeInputValidator))]
         CourseInputType courseInput, 
             [Service] ITopicEventSender topicEventSender,
-            ClaimsPrincipal claimsPrincipal)
+            [GlobalState("User")] User user)
         {
             Validate(courseInput);
 
-            string userId = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.ID);
-            string email = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL);
-            string userName = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.USERNAME);
-            string verified = claimsPrincipal.FindFirstValue(FirebaseUserClaimType.EMAIL_VERIFIED);
+            string userId = user.Id;
+            
 
 
             CourseDTO courseDTO = new CourseDTO()
